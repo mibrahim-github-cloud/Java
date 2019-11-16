@@ -1,0 +1,145 @@
+1) We need keytool for generating a key pair. First, the server key.
+"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -genkey -v -alias tomcat -keyalg RSA -validity 3650 -keystore C:\South\SSL_Certificates\Server\tomcat.keystore -dname "CN=localhost, OU=Developer, O=Fireworks, L=Milan, ST=Italy, C=IT" -storepass serverpassword -keypass serverpassword
+
+2) Next the client Key.
+"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -genkey -v -alias developer -keyalg RSA -storetype PKCS12 -keystore C:\South\SSL_Certificates\Client\developer.p12 -dname "CN=James Leg, OU=Solution, O=Fireworks, L=Milan, ST=Italy, C=IT" -storepass developerpassword -keypass developerpassword
+
+3) we need to export the certification from the client key and then add to server key store.
+"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -export -alias developer -keystore C:\South\SSL_Certificates\Client\developer.p12 -storetype PKCS12 -storepass developerpassword -rfc -file C:\South\SSL_Certificates\Client\developer.cer
+"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -import -v -file C:\South\SSL_Certificates\Client\developer.cer -keystore C:\South\SSL_Certificates\Server\tomcat.keystore -storepass serverpassword
+
+4) Look inside the certification key named tomcat.keystore to check the client and server keys.
+"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -list -v -keystore C:\South\SSL_Certificates\Server\tomcat.keystore -storepass serverpassword
+
+
+
+
+Links
+https://blog.behrang.org/2019/01/30/ssl-mutual-authentication-java.html //Referred
+
+Type 1:(both C and S having JKS and using RSA){SamePassword}
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -genkey -v -alias tomcat -keyalg RSA -validity 3650 -keystore C:\South\SSL_Certificates\Server\tomcat.jks -dname "CN=localhost, OU=Developer, O=Fireworks, L=Milan, ST=Italy, C=IT" -storepass serverpassword -keypass serverpassword
+
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -genkey -v -alias developer -keyalg RSA -keystore C:\South\SSL_Certificates\Client\developer.jks -dname "CN=James Leg, OU=Solution, O=Fireworks, L=Milan, ST=Italy, C=IT" -storepass developerpassword -keypass developerpassword
+	
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -export -alias developer -keystore C:\South\SSL_Certificates\Client\developer.jks -storepass developerpassword -rfc -file C:\South\SSL_Certificates\Client\developer.cer
+	
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -import -v -file C:\South\SSL_Certificates\Client\developer.cer -keystore C:\South\SSL_Certificates\Server\tomcat.jks -storepass serverpassword
+	
+Type 2:(both C and S having JKS and using DSA){SamePassword}
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -genkey -v -alias tomcat -keyalg DSA -validity 3650 -keystore C:\South\SSL_Certificates\Server\tomcat.jks -dname "CN=localhost, OU=Developer, O=Fireworks, L=Milan, ST=Italy, C=IT" -storepass serverpassword -keypass serverpassword
+
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -genkey -v -alias developer -keyalg DSA -keystore C:\South\SSL_Certificates\Client\developer.jks -dname "CN=James Leg, OU=Solution, O=Fireworks, L=Milan, ST=Italy, C=IT" -storepass developerpassword -keypass developerpassword
+	
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -export -alias developer -keystore C:\South\SSL_Certificates\Client\developer.jks -storepass developerpassword -rfc -file C:\South\SSL_Certificates\Client\developer.cer
+	
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -import -v -file C:\South\SSL_Certificates\Client\developer.cer -keystore C:\South\SSL_Certificates\Server\tomcat.jks -storepass serverpassword
+	
+Type 3:(both C and S having JKS and using RSA){Different Password}// Failed Due to Tomcat Server Doesn't allow this kind of configuration.
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -genkey -v -alias tomcat -keyalg RSA -validity 3650 -keystore C:\South\SSL_Certificates\Server\tomcat.jks -dname "CN=localhost, OU=Developer, O=Fireworks, L=Milan, ST=Italy, C=IT" -storepass serverstorepassword -keypass serverkeypassword
+	
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -genkey -v -alias developer -keyalg RSA -keystore C:\South\SSL_Certificates\Client\developer.jks -dname "CN=James Leg, OU=Solution, O=Fireworks, L=Milan, ST=Italy, C=IT" -storepass developerstorepassword -keypass developerkeypassword
+	
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -export -alias developer -keystore C:\South\SSL_Certificates\Client\developer.jks -storepass developerstorepassword -rfc -file C:\South\SSL_Certificates\Client\developer.cer
+	
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -import -v -file C:\South\SSL_Certificates\Client\developer.cer -keystore C:\South\SSL_Certificates\Server\tomcat.jks -storepass serverstorepassword
+	
+Type 4:(both C and S having PKCS12 and using RSA){SamePassword}{ KeyStore of client and Server : pkcs12 and Trust Store of Client:JKS}
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -genkey -v -alias tomcat -keyalg RSA -validity 3650 -storetype PKCS12 -keystore C:\South\SSL_Certificates\Server\tomcat.pfx -dname "CN=localhost, OU=Developer, O=Fireworks, L=Milan, ST=Italy, C=IT" -storepass serverpassword -keypass serverpassword
+	
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -genkey -v -alias developer -keyalg RSA -storetype PKCS12 -keystore C:\South\SSL_Certificates\Client\developer.pfx -dname "CN=James Leg, OU=Solution, O=Fireworks, L=Milan, ST=Italy, C=IT" -storepass developerpassword -keypass developerpassword
+	
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -export -alias developer -keystore C:\South\SSL_Certificates\Client\developer.pfx -storetype PKCS12 -storepass developerpassword -rfc -file C:\South\SSL_Certificates\Client\developer.cer
+	
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -import -v -file C:\South\SSL_Certificates\Client\developer.cer -keystore C:\South\SSL_Certificates\Server\tomcat.pfx -storepass serverpassword
+	
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -genkey -v -alias tomcat1 -keyalg RSA -validity 3650 -storetype PKCS12 -keystore C:\South\SSL_Certificates\Server\tomcat1.pfx -dname "CN=localhost, OU=Developer, O=Fireworks, L=Milan, ST=Italy, C=IT" -storepass serverpassword -keypass serverpassword
+	
+	
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -export -alias tomcat -keystore C:\South\SSL_Certificates\Server\tomcat.pfx -storetype PKCS12 -storepass serverpassword -rfc -file C:\South\SSL_Certificates\Server\tomcat.cer
+	
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -import -v -file C:\South\SSL_Certificates\Server\tomcat.cer -keystore C:\South\SSL_Certificates\Server\tomcat.jks -storepass serverpassword
+
+Type 5:(PKCS12 of Type .p12 version)
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -genkey -v -alias tomcat -keyalg RSA -validity 3650 -storetype PKCS12 -keystore C:\South\SSL_Certificates\Server\tomcat.p12 -dname "CN=localhost, OU=Developer, O=Fireworks, L=Milan, ST=Italy, C=IT" -storepass serverpassword -keypass serverpassword
+	
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -genkey -v -alias developer -keyalg RSA -storetype PKCS12 -keystore C:\South\SSL_Certificates\Client\developer.p12 -dname "CN=James Leg, OU=Solution, O=Fireworks, L=Milan, ST=Italy, C=IT" -storepass developerpassword -keypass developerpassword
+	
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -export -alias developer -keystore C:\South\SSL_Certificates\Client\developer.p12 -storetype PKCS12 -storepass developerpassword -rfc -file C:\South\SSL_Certificates\Client\developer.cer
+	
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -import -v -file C:\South\SSL_Certificates\Client\developer.cer -keystore C:\South\SSL_Certificates\Server\tomcat.p12 -storepass serverpassword
+	
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -genkey -v -alias tomcat1 -keyalg RSA -validity 3650 -keystore C:\South\SSL_Certificates\Server\tomcat1.jks -dname "CN=localhost, OU=Developer, O=Fireworks, L=Milan, ST=Italy, C=IT" -storepass serverpassword -keypass serverpassword
+	
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -export -alias tomcat -keystore C:\South\SSL_Certificates\Server\tomcat.p12 -storepass serverpassword -rfc -file C:\South\SSL_Certificates\Server\tomcat.cer
+	
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -import -v -file C:\South\SSL_Certificates\Server\tomcat.cer -keystore C:\South\SSL_Certificates\Server\tomcat1.jks -storepass serverpassword
+	
+Type 6:(PKCS12 of Type .pkcs12 version)
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -genkey -v -alias tomcat -keyalg RSA -validity 3650 -storetype PKCS12 -keystore C:\South\SSL_Certificates\Server\tomcat.pkcs12 -dname "CN=localhost, OU=Developer, O=Fireworks, L=Milan, ST=Italy, C=IT" -storepass serverpassword -keypass serverpassword
+	
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -genkey -v -alias developer -keyalg RSA -storetype PKCS12 -keystore C:\South\SSL_Certificates\Client\developer.pkcs12 -dname "CN=James Leg, OU=Solution, O=Fireworks, L=Milan, ST=Italy, C=IT" -storepass developerpassword -keypass developerpassword
+	
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -export -alias developer -keystore C:\South\SSL_Certificates\Client\developer.pkcs12 -storetype PKCS12 -storepass developerpassword -rfc -file C:\South\SSL_Certificates\Client\developer.cer
+	
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -import -v -file C:\South\SSL_Certificates\Client\developer.cer -keystore C:\South\SSL_Certificates\Server\tomcat.pkcs12 -storepass serverpassword
+	
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -genkey -v -alias tomcat1 -keyalg RSA -validity 3650 -keystore C:\South\SSL_Certificates\Server\tomcat1.jks -dname "CN=localhost, OU=Developer, O=Fireworks, L=Milan, ST=Italy, C=IT" -storepass serverpassword -keypass serverpassword
+	
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -export -alias tomcat -keystore C:\South\SSL_Certificates\Server\tomcat.pkcs12 -storepass serverpassword -rfc -file C:\South\SSL_Certificates\Server\tomcat.cer
+	
+	"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -import -v -file C:\South\SSL_Certificates\Server\tomcat.cer -keystore C:\South\SSL_Certificates\Server\tomcat1.jks -storepass serverpassword
+	
+	
+	
+	
+
+Keytool Certificate Chain creation Command(Client Certificate Creation)
+1) "C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -genkeypair -keystore C:\Users\mibrahim\Mutual_Authentication\root.jks -alias root -ext bc:c
+	KeyStorePassword : clientpassword
+	KeyPassword : clientpassword
+	
+2) "C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -genkeypair -keystore C:\Users\mibrahim\Mutual_Authentication\ca.jks -alias ca -ext bc:c
+	KeyStorePassword : clientpassword
+	KeyPassword : clientpassword
+
+3) "C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -genkeypair -keystore C:\Users\mibrahim\Mutual_Authentication\client.jks -alias client
+	KeyStorePassword : clientpassword
+	KeyPassword : clientpassword
+	
+4) "C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -keystore C:\Users\mibrahim\Mutual_Authentication\root.jks -alias root -exportcert -rfc > C:\Users\mibrahim\Mutual_Authentication\root.pem
+
+5) "C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -storepass clientpassword -keystore C:\Users\mibrahim\Mutual_Authentication\ca.jks -certreq -alias ca | "C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -storepass clientpassword -keystore C:\Users\mibrahim\Mutual_Authentication\root.jks -gencert -alias root -ext BC=0 -rfc > C:\Users\mibrahim\Mutual_Authentication\ca.pem 
+type C:\Users\mibrahim\Mutual_Authentication\root.pem C:\Users\mibrahim\Mutual_Authentication\ca.pem > C:\Users\mibrahim\Mutual_Authentication\cachain.pem
+
+"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -keystore C:\Users\mibrahim\Mutual_Authentication\ca.jks -importcert -alias ca -file C:\Users\mibrahim\Mutual_Authentication\cachain.pem
+	
+
+6) "C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -storepass clientpassword -keystore C:\Users\mibrahim\Mutual_Authentication\client.jks -certreq -alias client | "C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -storepass clientpassword -keystore C:\Users\mibrahim\Mutual_Authentication\ca.jks -gencert -alias ca -ext ku:c=dig,keyEncipherment -rfc > C:\Users\mibrahim\Mutual_Authentication\client.pem
+
+type C:\Users\mibrahim\Mutual_Authentication\root.pem C:\Users\mibrahim\Mutual_Authentication\ca.pem C:\Users\mibrahim\Mutual_Authentication\client.pem > C:\Users\mibrahim\Mutual_Authentication\clientchain.pem
+
+"C:\Program Files (x86)\Java\jre1.8.0_144\bin\keytool.exe" -keystore C:\Users\mibrahim\Mutual_Authentication\client.jks -importcert -alias client -file C:\Users\mibrahim\Mutual_Authentication\clientchain.pem
+
+Verification Commands
+openssl verify -CAfile C:\Users\mibrahim\Mutual_Authentication\root.pem -untrusted C:\Users\mibrahim\Mutual_Authentication\ca.pem C:\Users\mibrahim\Mutual_Authentication\client.pem
+
+	
+OpenSSL:
+1) openssl genrsa –out MutualAuthentication/RootCA.key 4096
+
+2) openssl req –new –x509 –days 1826 –key MutualAuthentication/RootCA.key –out MutualAuthentication/RootCA.crt
+
+3) openssl genrsa –out MutualAuthentication/IntermediateCA.key 4096
+
+4) openssl req –new –key MutualAuthentication/IntermediateCA.key –out MutualAuthentication/IntermediateCA.csr
+
+5) openssl x509 –req –days 1000 –in MutualAuthentication/IntermediateCA.csr –CA MutualAuthentication/RootCA.crt –CAkey MutualAuthentication/RootCA.key –CAcreateserial –out MutualAuthentication/IntermediateCA.crt
+
+6) openssl genrsa –out MutualAuthentication/Server.key 2048
+
+7) openssl req –new –key MutualAuthentication/Server.key –out MutualAuthentication/Server.csr
+
+8) openssl x509 –req –days 1000 –in MutualAuthentication/Server.csr –CA MutualAuthentication/IntermediateCA.crt –CAkey MutualAuthentication/IntermediateCA.key –set_serial 0101  –out MutualAuthentication/Server.crt –sha1
+
+9) openssl pkcs12 –export –out MutualAuthentication/tomcat.pfx –inkey MutualAuthentication/Server.key –in MutualAuthentication/Server.crt
