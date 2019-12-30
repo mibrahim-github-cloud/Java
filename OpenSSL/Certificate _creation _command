@@ -124,6 +124,9 @@ type C:\Users\mibrahim\Mutual_Authentication\root.pem C:\Users\mibrahim\Mutual_A
 Verification Commands
 openssl verify -CAfile C:\Users\mibrahim\Mutual_Authentication\root.pem -untrusted C:\Users\mibrahim\Mutual_Authentication\ca.pem C:\Users\mibrahim\Mutual_Authentication\client.pem
 
+7) Note: Not the client.crt from client.jks. client.der from "clientchain.pem"
+Syntax :: openssl x509 -outform der -in certificate.pem -out certificate.der
+openssl x509 -outform der -in C:\Users\mibrahim\Mutual_Authentication\clientchain.pem -out C:\Users\mibrahim\Mutual_Authentication\client.der
 	
 OpenSSL:
 1) openssl genrsa –out MutualAuthentication/RootCA.key 4096
